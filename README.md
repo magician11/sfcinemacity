@@ -6,7 +6,7 @@ A module to get showtimes for movies from the [SF Cinemacity](sfcinemacity.com) 
 
 All methods take a cinemaId, and return a set of results for the next week from their booking system.
 
-Those are:
+Those cinema IDs are:
 - Maya Mall in Chiang Mai -> 9936
 
 ### getMovieTitlesAndRatings
