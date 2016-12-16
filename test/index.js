@@ -16,7 +16,7 @@ sfcinemacity.getMovieTitlesAndRatings(mayaMallId)
 })
 .then((movieShowtimes) => {
   console.log('*Movie Showtimes*');
-  prettyPrint(movieShowtimes, null, 2);
+  prettyPrint(movieShowtimes);
 })
 .catch((error) => {
   console.log(`Whoops, something went wrong: ${error}`);
