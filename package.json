@@ -1,8 +1,8 @@
 {
   "name": "sfcinemacity",
-  "version": "0.1.8",
+  "version": "0.2.2",
   "description": "Module to get showtimes from the SF Cinema booking system.",
-  "main": "index.js",
+  "main": "lib/index.js",
   "scripts": {
     "build": "babel src --presets babel-preset-es2015 --out-dir lib",
     "prepublish": "npm run build"
@@ -15,6 +15,13 @@
   ],
   "author": "Andrew Golightly <support@andrewgolightly.com> (http://www.golightlyplus.com)",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/magician11/sfcinemacity.git"
+  },
+  "bugs": {
+    "url": "https://github.com/magician11/sfcinemacity/issues"
+  },
   "dependencies": {
     "cheerio": "^0.22.0",
     "request-promise-native": "^1.0.3"

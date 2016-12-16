@@ -2,9 +2,39 @@
 
 A module to get showtimes for movies from the [SF Cinemacity](sfcinemacity.com) booking system.
 
+## Usage
+
+`yarn add sfcinemacity`
+
+Then you can use it something like
+
+```
+const sfcinemacity = require('sfcinemacity');
+
+const mayaMallId = 9936;
+
+console.log(`Movie data for Maya Mall (Chiang Mai, Thailand) as of ${new Date().toString()}`);
+
+const prettyPrint = jsonObj => console.log(JSON.stringify(jsonObj, null, 2));
+
+sfcinemacity.getMovieTitlesAndRatings(mayaMallId)
+.then((movieTitles) => {
+  console.log('*Movie Titles*');
+  prettyPrint(movieTitles);
+  return sfcinemacity.getShowtimes(mayaMallId);
+})
+.then((movieShowtimes) => {
+  console.log('*Movie Showtimes*');
+  prettyPrint(movieShowtimes, null, 2);
+})
+.catch((error) => {
+  console.log(`Whoops, something went wrong: ${error}`);
+});
+```
+
 ## API
 
-All methods take a cinemaId, and return a set of results for the next week from their booking system.
+All methods take a cinemaId, and returns a promise that resolves with the set of results for the next week from the SF Cinemacity booking system.
 
 Those cinema IDs are:
 - Maya Mall in Chiang Mai -> 9936
