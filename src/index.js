@@ -1,13 +1,15 @@
 const cheerio = require('cheerio');
 const rp = require('request-promise-native');
 
+const baseUrl = 'https://booking.sfcinemacity.com/visPrintShowTimes.aspx?visLang=1&visCinemaId=';
+
 class SFCinemaCity {
 
-  getMovieTitlesAndRatings(cinemaId) {
+  static getMovieTitlesAndRatings(cinemaId) {
     return new Promise((resolve, reject) => {
       const options = {
-        uri: `https://booking.sfcinemacity.com/visPrintShowTimes.aspx?visLang=1&visCinemaId=${cinemaId}`,
-        transform: (body) => cheerio.load(body),
+        uri: `${baseUrl}${cinemaId}`,
+        transform: body => cheerio.load(body),
       };
 
       rp(options)
@@ -15,7 +17,7 @@ class SFCinemaCity {
         const movieTitles = {};
         $('#tblShowTimes td').each(function process() {
           if ($(this).hasClass('PrintShowTimesFilm')) {
-            const titleAndRating = $(this).text().match(/(.+) \(.+\[(.+)\]/);
+            const titleAndRating = $(this).text().match(/(.+) \(.+\[(.+)]/);
             movieTitles[titleAndRating[1]] = titleAndRating[2];
           }
         });
@@ -39,11 +41,11 @@ class SFCinemaCity {
 
   movieTitle -> [showTimes] -> date -> [movietype] -> times
   */
-  getShowtimes(cinemaId) {
+  static getShowtimes(cinemaId) {
     return new Promise((resolve, reject) => {
       const options = {
-        uri: `https://booking.sfcinemacity.com/visPrintShowTimes.aspx?visLang=1&visCinemaId=${cinemaId}`,
-        transform: (body) => cheerio.load(body),
+        uri: `${baseUrl}${cinemaId}`,
+        transform: body => cheerio.load(body),
       };
 
       rp(options)
@@ -87,7 +89,7 @@ class SFCinemaCity {
         const normaliseKey = key => key.replace(/\/|\./g, '-');
 
         const coalescedMovieData = {};
-        for (const movieName of Object.keys(movieData)) {
+        Object.keys(movieData).forEach((movieName) => {
           const titleAndLanguage = movieName.match(/(.+) \((.+)\)/);
           const movieTitle = titleAndLanguage[1];
           const language = normaliseKey(titleAndLanguage[2]);
@@ -96,17 +98,17 @@ class SFCinemaCity {
             coalescedMovieData[movieTitle].title = movieTitle;
             coalescedMovieData[movieTitle].showTimes = {};
           }
-          for (const movieDate of Object.keys(movieData[movieName])) {
+          Object.keys(movieData[movieName]).forEach((movieDate) => {
             if (!coalescedMovieData[movieTitle].showTimes[movieDate]) {
               coalescedMovieData[movieTitle].showTimes[movieDate] = {};
             }
 
             // eslint-disable-next-line max-len
             coalescedMovieData[movieTitle].showTimes[movieDate][language] = movieData[movieName][movieDate];
-          }
-        }
+          });
+        });
 
-        resolve(coalescedMovieData);
+        resolve(Object.values(coalescedMovieData));
       })
       .catch((error) => {
         reject(`SF Cinema City - trouble getting showtimes: ${error}`);
@@ -115,4 +117,4 @@ class SFCinemaCity {
   }
 }
 
-module.exports = new SFCinemaCity();
+module.exports = SFCinemaCity;
