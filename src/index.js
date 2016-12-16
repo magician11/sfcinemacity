@@ -99,6 +99,7 @@ class SFCinemaCity {
         const normaliseKey = key => key.replace(/\/|\./g, '-');
 
         const coalescedMovieData = {};
+        // go through every moving listing
         Object.keys(movieData).forEach((movieName) => {
           const titleAndLanguage = movieName.match(/(.+) \((.+)\)/);
           const movieTitle = titleAndLanguage[1];
@@ -108,6 +109,8 @@ class SFCinemaCity {
             coalescedMovieData[movieTitle].title = movieTitle;
             coalescedMovieData[movieTitle].showTimes = {};
           }
+
+          // then for that movie listing, go through all the dates it's showing
           Object.keys(movieData[movieName]).forEach((movieDate) => {
             if (!coalescedMovieData[movieTitle].showTimes[movieDate]) {
               coalescedMovieData[movieTitle].showTimes[movieDate] = {};
