@@ -5,6 +5,15 @@ const baseUrl = 'https://booking.sfcinemacity.com/visPrintShowTimes.aspx?visLang
 
 class SFCinemaCity {
 
+  /*
+  Takes a cinema ID and returns an array of objects.
+
+  Each object has the structure:
+
+  "title": "FANTASTIC BEASTS AND WHERE TO FIND THEM",
+  "rating": "G"
+
+  */
   static getMovieTitlesAndRatings(cinemaId) {
     return new Promise((resolve, reject) => {
       const options = {
@@ -39,7 +48,8 @@ class SFCinemaCity {
 
   Each object looks like:
 
-  movieTitle -> [showTimes] -> date -> [movietype] -> times
+  "title": "FANTASTIC BEASTS AND WHERE TO FIND THEM",
+  "showTimes" -> "Fri 16 Dec" -> "E" -> "13:00, 18:40"
   */
   static getShowtimes(cinemaId) {
     return new Promise((resolve, reject) => {
