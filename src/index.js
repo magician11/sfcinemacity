@@ -27,7 +27,14 @@ class SFCinemaCity {
         $('#tblShowTimes td').each(function process() {
           if ($(this).hasClass('PrintShowTimesFilm')) {
             const titleAndRating = $(this).text().match(/(.+) \(.+\[(.+)]/);
-            movieTitles[titleAndRating[1]] = titleAndRating[2];
+            /*
+            make sure there is a full match, otherwise bail out.
+            Check implemented because of failure with "JOHN WICK : CHAPTER 2 [18]"
+            i.e. no language specified
+            */
+            if (titleAndRating) {
+              movieTitles[titleAndRating[1]] = titleAndRating[2];
+            }
           }
         });
 
@@ -102,6 +109,10 @@ class SFCinemaCity {
         // go through every moving listing
         Object.keys(movieData).forEach((movieName) => {
           const titleAndLanguage = movieName.match(/(.+) \((.+)\)/);
+          // check that there is a match, otherwise bail out
+          if (!titleAndLanguage) {
+            return;
+          }
           const movieTitle = titleAndLanguage[1];
           const language = normaliseKey(titleAndLanguage[2]);
           if (!coalescedMovieData[movieTitle]) {
