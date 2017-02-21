@@ -15,17 +15,10 @@ const mayaMallId = 9936;
 
 console.log(`Movie data for Maya Mall (Chiang Mai, Thailand) as of ${new Date().toString()}`);
 
-const prettyPrint = jsonObj => console.log(JSON.stringify(jsonObj, null, 2));
-
-sfcinemacity.getMovieTitlesAndRatings(mayaMallId)
-.then((movieTitles) => {
-  console.log('*Movie Titles*');
-  prettyPrint(movieTitles);
-  return sfcinemacity.getShowtimes(mayaMallId);
-})
+sfcinemacity.getShowtimes(mayaMallId)
 .then((movieShowtimes) => {
   console.log('*Movie Showtimes*');
-  prettyPrint(movieShowtimes);
+  console.log(JSON.stringify(movieShowtimes, null, 2));
 })
 .catch((error) => {
   console.log(`Whoops, something went wrong: ${error}`);
@@ -34,31 +27,15 @@ sfcinemacity.getMovieTitlesAndRatings(mayaMallId)
 
 ## API
 
-All methods take a cinemaId, and returns a promise that resolves with the set of results for the next week from the SF Cinemacity booking system.
-
-Those cinema IDs are:
+Cinema IDs are:
 - Maya Mall in Chiang Mai -> 9936
-
-### getMovieTitlesAndRatings
-
-Takes the cinemaId and returns an array of objects with the properties:
-
-- title (string)
-- rating (string)
-
-e.g.
-```
-{
-  "title": "FANTASTIC BEASTS AND WHERE TO FIND THEM",
-  "rating": "G"
-}
-```
 
 ### getShowtimes
 
-Takes the cinemaId and returns an array of objects with the properties:
+Takes a cinemaId and returns a promise that resolves with an array of objects with the properties:
 
 - title (string)
+- rating (string)
 - showTimes
   - date (key)
     - language (key)
@@ -67,46 +44,19 @@ Takes the cinemaId and returns an array of objects with the properties:
 e.g.
 ```
 {
-  "title": "ROGUE ONE A STAR WARS STORY",
-  "showTimes": {
-    "Fri 16 Dec": {
-      "E": "13:50, 15:50, 16:40, 19:30, 21:30, 22:20",
-      "E-ATMOS": "12:00, 14:50, 17:40, 20:30, 23:20",
-      "F": "12:30, 15:20, 18:10, 21:00",
-      "T": "14:20, 17:10, 20:00, 22:50"
-    },
-    "Sat 17 Dec": {
-      "E": "11:00, 13:50, 16:40, 19:30, 22:20",
-      "E-ATMOS": "12:00, 14:50, 17:40, 20:30, 23:20",
-      "F": "12:30, 15:20, 18:10, 21:00",
-      "T": "11:30, 14:20, 17:10, 20:00, 22:50"
-    },
-    "Sun 18 Dec": {
-      "E": "11:00, 13:50, 16:40, 19:30, 22:20",
-      "E-ATMOS": "12:00, 14:50, 17:40, 20:30, 23:20",
-      "F": "12:30, 15:20, 18:10, 21:00",
-      "T": "11:30, 14:20, 17:10, 20:00, 22:50"
-    },
-    "Mon 19 Dec": {
-      "E": "13:50, 16:40, 19:30, 22:20",
-      "E-ATMOS": "12:00, 14:50, 17:40, 20:30, 23:20",
-      "F": "12:30, 15:20, 18:10, 21:00",
-      "T": "11:30, 14:20, 17:10, 20:00, 22:50"
-    },
-    "Tue 20 Dec": {
-      "E": "13:50, 16:40, 19:30, 22:20",
-      "E-ATMOS": "12:00, 14:50, 17:40, 20:30, 23:20",
-      "F": "12:30, 15:20, 18:10, 21:00",
-      "T": "11:30, 14:20, 17:10, 20:00, 22:50"
-    },
-    "Wed 21 Dec": {
-      "E": "13:50, 16:40, 19:30, 22:20",
-      "E-ATMOS": "12:00, 14:50, 17:40, 20:30, 23:20",
-      "F": "12:30, 15:20, 18:10, 21:00",
-      "T": "11:30, 14:20, 17:10, 20:00, 22:50"
-    }
-  }
-},
+   "title": "JOHN WICK : CHAPTER 2",
+   "rating": "18",
+   "showTimes": {
+     "Tue 21 Feb": {
+       "E": "22:30, 23:20"
+     },
+     "Wed 22 Feb": {
+       "E": "12:20, 15:05, 17:50, 20:00, 20:35, 22:30, 23:20",
+       "F": "13:00, 15:45, 18:30, 21:15",
+       "T": "11:25, 13:45, 16:30, 19:15, 22:00"
+     }
+   }
+ },
 ```
 
 ## LICENSE

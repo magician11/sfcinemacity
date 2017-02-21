@@ -8,55 +8,11 @@ class SFCinemaCity {
   /*
   Takes a cinema ID and returns an array of objects.
 
-  Each object has the structure:
-
-  "title": "FANTASTIC BEASTS AND WHERE TO FIND THEM",
-  "rating": "G"
-
-  */
-  static getMovieTitlesAndRatings(cinemaId) {
-    return new Promise((resolve, reject) => {
-      const options = {
-        uri: `${baseUrl}${cinemaId}`,
-        transform: body => cheerio.load(body),
-      };
-
-      rp(options)
-      .then(($) => {
-        const movieTitles = {};
-        $('#tblShowTimes td').each(function process() {
-          if ($(this).hasClass('PrintShowTimesFilm')) {
-            const titleAndRating = $(this).text().match(/(.+) \(.+\[(.+)]/);
-            /*
-            make sure there is a full match, otherwise bail out.
-            Check implemented because of failure with "JOHN WICK : CHAPTER 2 [18]"
-            i.e. no language specified
-            */
-            if (titleAndRating) {
-              movieTitles[titleAndRating[1]] = titleAndRating[2];
-            }
-          }
-        });
-
-        const movies = [];
-        Object.keys(movieTitles).forEach((movieTitle) => {
-          movies.push({ title: movieTitle, rating: movieTitles[movieTitle] });
-        });
-        resolve(movies);
-      })
-      .catch((error) => {
-        reject(`SF Cinema City - trouble getting movie titles: ${error}`);
-      });
-    });
-  }
-
-  /*
-  Takes a cinema ID and returns an array of objects.
-
   Each object looks like:
 
   "title": "FANTASTIC BEASTS AND WHERE TO FIND THEM",
-  "showTimes" -> "Fri 16 Dec" -> "E" -> "13:00, 18:40"
+  "showTimes" -> "Fri 16 Dec" -> "E" -> "13:00, 18:40",
+  "rating" -> "18"
   */
   static getShowtimes(cinemaId) {
     return new Promise((resolve, reject) => {
@@ -108,16 +64,28 @@ class SFCinemaCity {
         const coalescedMovieData = {};
         // go through every moving listing
         Object.keys(movieData).forEach((movieName) => {
-          const titleAndLanguage = movieName.match(/(.+) \((.+)\)/);
-          // check that there is a match, otherwise bail out
-          if (!titleAndLanguage) {
-            return;
+          /*
+          if it starts with JF, then grab the title and rating, and assume Japanese language
+          otherwise assume format: title (language) [rating]
+          */
+          let titleOnBookingSite;
+          let movieTitle;
+          let language;
+
+          if (movieName.startsWith('JF')) {
+            titleOnBookingSite = movieName.match(/(JF )(.+) \[(.+)]/);
+            movieTitle = titleOnBookingSite[2];
+            language = 'J';
+          } else {
+            titleOnBookingSite = movieName.match(/(.+) \((.+)\) \[(.+)]/);
+            movieTitle = titleOnBookingSite[1];
+            language = normaliseKey(titleOnBookingSite[2]);
           }
-          const movieTitle = titleAndLanguage[1];
-          const language = normaliseKey(titleAndLanguage[2]);
+
           if (!coalescedMovieData[movieTitle]) {
             coalescedMovieData[movieTitle] = {};
             coalescedMovieData[movieTitle].title = movieTitle;
+            coalescedMovieData[movieTitle].rating = titleOnBookingSite[3];
             coalescedMovieData[movieTitle].showTimes = {};
           }
 
