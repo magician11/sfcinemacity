@@ -78,8 +78,16 @@ class SFCinemaCity {
             language = 'J';
           } else {
             titleOnBookingSite = movieName.match(/(.+) \((.+)\) \[(.+)]/);
-            movieTitle = titleOnBookingSite[1];
-            language = normaliseKey(titleOnBookingSite[2]);
+
+            // To catch when the language is not specified e.g. LOGAN [15]
+            if (titleOnBookingSite) {
+              movieTitle = titleOnBookingSite[1];
+              language = normaliseKey(titleOnBookingSite[2]);
+            } else {
+              titleOnBookingSite = movieName.match(/(.+) \[(.+)]/);
+              movieTitle = titleOnBookingSite[1];
+              language = 'E';
+            }
           }
 
           if (!coalescedMovieData[movieTitle]) {
