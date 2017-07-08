@@ -1,28 +1,30 @@
 # SF Cinemacity
 
-A module to get showtimes for movies from the [SF Cinemacity](sfcinemacity.com) booking system.
+A module to get showtimes for movies from the [SF Cinemacity](sfcinemacity.com) website.
 
 ## Usage
 
-`yarn add sfcinemacity`
+First install [Chrome Canary](https://www.google.com/chrome/browser/canary.html) on your machine.
 
-Then you can use it something like
+Then install this module: `yarn add sfcinemacity`
+
+Then you can use it in your code, something like
 
 ```
-const sfcinemacity = require('sfcinemacity');
+const { getShowtimes } = require('sfcinemacity');
 
-const mayaMallId = 9936;
+const getMayaMallShowtimes = async () => {
+  try {
+    const mayaMallId = 9936;
+    const movieShowtimes = await getShowtimes(mayaMallId);
+    console.log(JSON.stringify(movieShowtimes, null, 2));
+  } catch (error) {
+    console.log(`Whoops, something went wrong: ${error}`);
+  }
+};
 
-console.log(`Movie data for Maya Mall (Chiang Mai, Thailand) as of ${new Date().toString()}`);
-
-sfcinemacity.getShowtimes(mayaMallId)
-.then((movieShowtimes) => {
-  console.log('*Movie Showtimes*');
-  console.log(JSON.stringify(movieShowtimes, null, 2));
-})
-.catch((error) => {
-  console.log(`Whoops, something went wrong: ${error}`);
-});
+console.log('Showtimes today for Maya Mall (Chiang Mai, Thailand).');
+getMayaMallShowtimes();
 ```
 
 ## API
@@ -32,32 +34,43 @@ Cinema IDs are:
 
 ### getShowtimes
 
-Takes a cinemaId and returns a promise that resolves with an array of objects with the properties:
+Takes a cinemaId and returns a promise that resolves with an object with the following data structure:
 
-- title (string)
-- rating (string)
-- showTimes
-  - date (key)
-    - language (key)
-      - showtimes (string)
-
+- cinema title (string)
+- today's date (string)
+- movies showing (array of movies showing)
+  - title (string)
+  - rating (string)
+  - duration (string)
+      - cinemas at this theatre showing this movie (array of cinemas)
+        - cinema number (string)
+        - language of this showing (string)
+        - times it's showing (comma separated value of times as a string)
 e.g.
 ```
 {
-   "title": "JOHN WICK : CHAPTER 2",
-   "rating": "18",
-   "showTimes": {
-     "Tue 21 Feb": {
-       "E": "22:30, 23:20"
-     },
-     "Wed 22 Feb": {
-       "E": "12:20, 15:05, 17:50, 20:00, 20:35, 22:30, 23:20",
-       "F": "13:00, 15:45, 18:30, 21:15",
-       "T": "11:25, 13:45, 16:30, 19:15, 22:00"
-     }
-   }
- },
+  "cinema": "SFX CINEMA Maya Chiangmai",
+  "today": "09 Jul 2017",
+  "movies": [
+    {
+      "title": "Spider-Man: Homecoming",
+      "rating": "G",
+      "duration": "135 mins",
+      "cinemas": [
+        {
+          "number": "10",
+          "language": "ENG",
+          "times": "13:10,16:10,19:10,22:10"
+        },
+        {
+          "number": "2",
+          "language": "ENG",
+          "times": "11:20,14:20,17:20,20:20,23:20"
+        },
 ```
+
+## Support
+To get support, just [create a new issue](https://github.com/magician11/sfcinemacity/issues/new).
 
 ## LICENSE
 ISC

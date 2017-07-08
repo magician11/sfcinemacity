@@ -1,120 +1,109 @@
+const CDP = require('chrome-remote-interface');
+const chromeLauncher = require('chrome-launcher');
 const cheerio = require('cheerio');
-const rp = require('request-promise-native');
 
-const baseUrl = 'https://booking.sfcinemacity.com/visPrintShowTimes.aspx?visLang=1&visCinemaId=';
+const getShowtimes = cinemaId => {
+  return new Promise(async (resolve, reject) => {
+    const launchChrome = () =>
+      chromeLauncher.launch({ chromeFlags: ['--disable-gpu', '--headless'] });
 
-class SFCinemaCity {
+    const chrome = await launchChrome();
+    const protocol = await CDP({ port: chrome.port });
 
-  /*
-  Takes a cinema ID and returns an array of objects.
+    const timeout = ms => new Promise(resolve => setTimeout(resolve, ms));
 
-  Each object looks like:
+    // See API docs: https://chromedevtools.github.io/devtools-protocol/
+    const { Page, Runtime, DOM } = protocol;
+    await Promise.all([Page.enable(), Runtime.enable(), DOM.enable()]);
 
-  "title": "FANTASTIC BEASTS AND WHERE TO FIND THEM",
-  "showTimes" -> "Fri 16 Dec" -> "E" -> "13:00, 18:40",
-  "rating" -> "18"
-  */
-  static getShowtimes(cinemaId) {
-    return new Promise((resolve, reject) => {
-      const options = {
-        uri: `${baseUrl}${cinemaId}`,
-        transform: body => cheerio.load(body),
-      };
+    Page.navigate({
+      url: `https://www.sfcinemacity.com/showtime/cinema/${cinemaId}`
+    });
 
-      rp(options)
-      /*
-      First extract the movie data from the booking.sfcinemacity.com site
-      and return an object that has
-      title -> date -> times
+    // wait until the page says it's loaded...
+    Page.loadEventFired(async () => {
+      try {
+        await timeout(3000); // give the JS some time to load
 
-      e.g.
-
-      'FANTASTIC BEASTS AND WHERE TO FIND THEM (E/ATMOS) [G]':
-      { 'Sun 27 Nov': '17:40, 20:30, 23:20',
-      'Mon 28 Nov': '12:00, 14:50, 17:40, 20:30, 23:20',
-      'Tue 29 Nov': '12:00, 14:50, 17:40, 20:30, 23:20',
-      'Wed 30 Nov': '12:00, 14:50, 17:40, 20:30, 23:20' },
-      */
-      .then(($) => {
-        const movieData = {};
-        let currentMovie;
-        let currentDate;
-        $('#tblShowTimes td').each(function process() {
-          if ($(this).hasClass('PrintShowTimesFilm')) {
-            currentMovie = $(this).text();
-            movieData[currentMovie] = {};
-          } else if ($(this).hasClass('PrintShowTimesDay')) {
-            currentDate = $(this).text();
-          } else if ($(this).hasClass('PrintShowTimesSession')) {
-            movieData[currentMovie][currentDate] = $(this).text();
-          }
+        // first set the language to English
+        const result = await Runtime.evaluate({
+          expression:
+            "document.querySelector('.lang-switcher li:nth-of-type(2) a').click()"
         });
 
-        return movieData;
-      })
-      /*
-      Next coalesce the same movies with different languages and sound systems.
-      So we have
-      movieTitle -> showTimes -> date -> movietype -> times
-      */
-      .then((movieData) => {
-        // replace special characters with hyphens
-        const normaliseKey = key => key.replace(/\/|\./g, '-');
+        // get the page source
+        const rootNode = await DOM.getDocument({ depth: -1 });
+        const pageSource = await DOM.getOuterHTML({
+          nodeId: rootNode.root.nodeId
+        });
+        protocol.close();
+        chrome.kill();
 
-        const coalescedMovieData = {};
-        // go through every moving listing
-        Object.keys(movieData).forEach((movieName) => {
-          /*
-          if it starts with JF, then grab the title and rating, and assume Japanese language
-          otherwise assume format: title (language) [rating]
-          */
-          let titleOnBookingSite;
-          let movieTitle;
-          let language;
+        // load the page source into cheerio
+        const $ = cheerio.load(pageSource.outerHTML);
 
-          if (movieName.startsWith('JF')) {
-            titleOnBookingSite = movieName.match(/(JF )(.+) \[(.+)]/);
-            movieTitle = titleOnBookingSite[2];
-            language = 'J';
-          } else {
-            titleOnBookingSite = movieName.match(/(.+) \((.+)\) \[(.+)]/);
+        // perform queries
+        const movies = [];
+        $('.showtime-box').each((i, movieNode) => {
+          const movie = {
+            title: $(movieNode).find('.movie-detail .name').text(),
+            rating: $(movieNode)
+              .find('.movie-detail .movie-detail-list .list-item')
+              .first()
+              .text()
+              .split('Rate: ')[1],
+            duration: $(movieNode)
+              .find('.movie-detail .movie-detail-list .list-item')
+              .last()
+              .text()
+              .split(' ')[1]
+          };
 
-            // To catch when the language is not specified e.g. LOGAN [15]
-            if (titleOnBookingSite) {
-              movieTitle = titleOnBookingSite[1];
-              language = normaliseKey(titleOnBookingSite[2]);
-            } else {
-              titleOnBookingSite = movieName.match(/(.+) \[(.+)]/);
-              movieTitle = titleOnBookingSite[1];
-              language = 'E';
-            }
-          }
+          const cinemas = [];
+          $(movieNode).find('.showtime-item').each((i, cinemaNode) => {
+            cinemas.push({
+              number: $(cinemaNode).find('.theater-no').text(),
+              language: $(cinemaNode)
+                .find('.right-section .list-item')
+                .first()
+                .text()
+                .split(' ')[1]
+                .slice(0, -1),
+              times: $(cinemaNode)
+                .find('.time-list .time-item')
+                .map((i, el) => $(el).text())
+                .get()
+                .join()
+            });
+          });
 
-          if (!coalescedMovieData[movieTitle]) {
-            coalescedMovieData[movieTitle] = {};
-            coalescedMovieData[movieTitle].title = movieTitle;
-            coalescedMovieData[movieTitle].rating = titleOnBookingSite[3];
-            coalescedMovieData[movieTitle].showTimes = {};
-          }
-
-          // then for that movie listing, go through all the dates it's showing
-          Object.keys(movieData[movieName]).forEach((movieDate) => {
-            if (!coalescedMovieData[movieTitle].showTimes[movieDate]) {
-              coalescedMovieData[movieTitle].showTimes[movieDate] = {};
-            }
-
-            // eslint-disable-next-line max-len
-            coalescedMovieData[movieTitle].showTimes[movieDate][language] = movieData[movieName][movieDate];
+          movies.push({
+            title: $(movieNode).find('.movie-detail .name').text(),
+            rating: $(movieNode)
+              .find('.movie-detail .movie-detail-list .list-item')
+              .first()
+              .text()
+              .split('Rate: ')[1],
+            duration: `${$(movieNode)
+              .find('.movie-detail .movie-detail-list .list-item')
+              .last()
+              .text()
+              .split(' ')[1]} mins`,
+            cinemas
           });
         });
-
-        resolve(Object.values(coalescedMovieData));
-      })
-      .catch((error) => {
-        reject(`SF Cinema City - trouble getting showtimes: ${error}`);
-      });
+        resolve({
+          cinema: $('.showtime-cinema-name').text(),
+          today: $('.slick-slide.selected .date').text(),
+          movies
+        });
+      } catch (err) {
+        console.log(err);
+      }
     });
-  }
-}
+  });
+};
 
-module.exports = SFCinemaCity;
+module.exports = {
+  getShowtimes
+};
