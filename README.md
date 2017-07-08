@@ -1,6 +1,6 @@
 # SF Cinemacity
 
-A module to get showtimes for movies from the [SF Cinemacity](sfcinemacity.com) website.
+A module to get showtimes for movies from the [SF Cinemacity](https://www.sfcinemacity.com/) website.
 
 ## Usage
 
