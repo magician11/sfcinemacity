@@ -2,8 +2,10 @@ const CDP = require('chrome-remote-interface');
 const chromeLauncher = require('chrome-launcher');
 const cheerio = require('cheerio');
 
-const getShowtimes = cinemaId => {
+const getShowtimes = movieTheatreId => {
   return new Promise(async (resolve, reject) => {
+
+    // First scrape the showtime data using Google Chrome from the SF Cinemacity website
     const launchChrome = () =>
       chromeLauncher.launch({ chromeFlags: ['--disable-gpu', '--headless'] });
 
@@ -17,7 +19,7 @@ const getShowtimes = cinemaId => {
     await Promise.all([Page.enable(), Runtime.enable(), DOM.enable()]);
 
     Page.navigate({
-      url: `https://www.sfcinemacity.com/showtime/cinema/${cinemaId}`
+      url: `https://www.sfcinemacity.com/showtime/cinema/${movieTheatreId}`
     });
 
     // wait until the page says it's loaded...
@@ -42,27 +44,23 @@ const getShowtimes = cinemaId => {
         // load the page source into cheerio
         const $ = cheerio.load(pageSource.outerHTML);
 
-        // perform queries
-        const movies = [];
+        // now proess that HTML
+        const movieTheatreData = {
+          movies: {}
+        };
         $('.showtime-box').each((i, movieNode) => {
-          const movie = {
-            title: $(movieNode).find('.movie-detail .name').text(),
-            rating: $(movieNode)
-              .find('.movie-detail .movie-detail-list .list-item')
-              .first()
-              .text()
-              .split('Rate: ')[1],
-            duration: $(movieNode)
-              .find('.movie-detail .movie-detail-list .list-item')
-              .last()
-              .text()
-              .split(' ')[1]
-          };
 
-          const cinemas = [];
+          // Set the title of this cinema, today's date, and the object of movies.
+          movieTheatreData.movieTheatreName = $('.showtime-cinema-name').text();
+          movieTheatreData.today = $('.slick-slide.selected .date').text();
+
+          /*
+            Build up the leaf nodes of the tree, namely for a cinema for a movie,
+            what language is it showing in and what are the showtimes.
+          */
+          const cinemas = {};
           $(movieNode).find('.showtime-item').each((i, cinemaNode) => {
-            cinemas.push({
-              number: $(cinemaNode).find('.theater-no').text(),
+            cinemas[$(cinemaNode).find('.theater-no').text()] = {
               language: $(cinemaNode)
                 .find('.right-section .list-item')
                 .first()
@@ -74,11 +72,16 @@ const getShowtimes = cinemaId => {
                 .map((i, el) => $(el).text())
                 .get()
                 .join()
-            });
+            };
           });
 
-          movies.push({
-            title: $(movieNode).find('.movie-detail .name').text(),
+          /*
+            Then create the full movie object with the movie name as the key, and with the properties
+            of the rating, the duration, and the cinemas showing the movie at this theatre.
+          */
+          movieTheatreData.movies[
+            $(movieNode).find('.movie-detail .name').text()
+          ] = {
             rating: $(movieNode)
               .find('.movie-detail .movie-detail-list .list-item')
               .first()
@@ -90,13 +93,10 @@ const getShowtimes = cinemaId => {
               .text()
               .split(' ')[1]} mins`,
             cinemas
-          });
+          };
         });
-        resolve({
-          cinema: $('.showtime-cinema-name').text(),
-          today: $('.slick-slide.selected .date').text(),
-          movies
-        });
+
+        resolve(movieTheatreData);
       } catch (err) {
         console.log(err);
       }

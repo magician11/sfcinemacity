@@ -34,39 +34,83 @@ Cinema IDs are:
 
 ### getShowtimes
 
-Takes a cinemaId and returns a promise that resolves with an object with the following data structure:
+Takes a movieTheatreId and returns a promise that resolves with an object with a data structure that looks like this:
 
-- cinema title (string)
-- today's date (string)
-- movies showing (array of movies showing)
-  - title (string)
-  - rating (string)
-  - duration (string)
-      - cinemas at this theatre showing this movie (array of cinemas)
-        - cinema number (string)
-        - language of this showing (string)
-        - times it's showing (comma separated value of times as a string)
-e.g.
 ```
 {
-  "cinema": "SFX CINEMA Maya Chiangmai",
-  "today": "09 Jul 2017",
-  "movies": [
-    {
-      "title": "Spider-Man: Homecoming",
+  "movies": {
+    "Spider-Man: Homecoming": {
       "rating": "G",
       "duration": "135 mins",
-      "cinemas": [
-        {
-          "number": "10",
+      "cinemas": {
+        "1": {
           "language": "ENG",
-          "times": "13:10,16:10,19:10,22:10"
+          "times": "13:35,16:35,19:35,22:35"
         },
-        {
-          "number": "2",
+        "2": {
           "language": "ENG",
           "times": "11:20,14:20,17:20,20:20,23:20"
         },
+        "4": {
+          "language": "TH",
+          "times": "12:30,15:30,18:30,21:30"
+        },
+        "5": {
+          "language": "TH",
+          "times": "11:10,14:00,17:00,20:00,23:00"
+        },
+        "6": {
+          "language": "ENG",
+          "times": "12:50,15:50,18:50,21:50"
+        },
+        "8": {
+          "language": "ENG",
+          "times": "13:20,16:20,19:20,22:20"
+        },
+        "9": {
+          "language": "ENG",
+          "times": "12:05,15:05,18:05,21:05"
+        },
+        "10": {
+          "language": "ENG",
+          "times": "13:10,16:10,19:10,22:10"
+        }
+      }
+    },
+    "Transformers : The Last Knight": {
+      "rating": "G",
+      "duration": "150 mins",
+      "cinemas": {
+        "7": {
+          "language": "ENG",
+          "times": "14:10,20:10"
+        }
+      }
+    },
+    "Despicable Me 3": {
+      "rating": "13",
+      "duration": "90 mins",
+      "cinemas": {
+        "3": {
+          "language": "ENG",
+          "times": "13:50,21:10"
+        }
+      }
+    },
+    "Wonder Woman": {
+      "rating": "G",
+      "duration": "145 mins",
+      "cinemas": {
+        "3": {
+          "language": "ENG",
+          "times": "16:00,23:10"
+        }
+      }
+    }
+  },
+  "movieTheatreName": "SFX CINEMA Maya Chiangmai",
+  "today": "09 Jul 2017"
+}
 ```
 
 ## Support
