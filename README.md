@@ -16,7 +16,8 @@ const { getShowtimes } = require('sfcinemacity');
 const getMayaMallShowtimes = async () => {
   try {
     const mayaMallId = 9936;
-    const movieShowtimes = await getShowtimes(mayaMallId);
+    // fetch all the showtimes for Maya Mall for tomorrow
+    const movieShowtimes = await getShowtimes(mayaMallId, 1);
     console.log(JSON.stringify(movieShowtimes, null, 2));
   } catch (error) {
     console.log(`Whoops, something went wrong: ${error}`);
@@ -34,14 +35,18 @@ Cinema IDs are:
 
 ### getShowtimes
 
-Takes a movieTheatreId and returns a promise that resolves with an object with a data structure that looks like this:
+Parameters:
+- a movieTheatreId (see the IDs above)
+- an optional dayOffset (0 is the default which also means today. 1 would be tomorrow)
+
+Returns:
+- a promise that resolves with an object with a data structure that looks like this:
 
 ```
 {
   "movies": {
     "Spider-Man: Homecoming": {
       "rating": "G",
-      "duration": "135 mins",
       "cinemas": {
         "1": {
           "language": "ENG",
@@ -63,10 +68,6 @@ Takes a movieTheatreId and returns a promise that resolves with an object with a
           "language": "ENG",
           "times": "12:50,15:50,18:50,21:50"
         },
-        "8": {
-          "language": "ENG",
-          "times": "13:20,16:20,19:20,22:20"
-        },
         "9": {
           "language": "ENG",
           "times": "12:05,15:05,18:05,21:05"
@@ -79,17 +80,19 @@ Takes a movieTheatreId and returns a promise that resolves with an object with a
     },
     "Transformers : The Last Knight": {
       "rating": "G",
-      "duration": "150 mins",
       "cinemas": {
         "7": {
+          "language": "TH",
+          "times": "11:30,14:40,17:50,21:00"
+        },
+        "8": {
           "language": "ENG",
-          "times": "14:10,20:10"
+          "times": "13:00,16:10,19:20,22:30"
         }
       }
     },
     "Despicable Me 3": {
       "rating": "13",
-      "duration": "90 mins",
       "cinemas": {
         "3": {
           "language": "ENG",
@@ -99,7 +102,6 @@ Takes a movieTheatreId and returns a promise that resolves with an object with a
     },
     "Wonder Woman": {
       "rating": "G",
-      "duration": "145 mins",
       "cinemas": {
         "3": {
           "language": "ENG",
@@ -109,7 +111,7 @@ Takes a movieTheatreId and returns a promise that resolves with an object with a
     }
   },
   "movieTheatreName": "SFX CINEMA Maya Chiangmai",
-  "today": "09 Jul 2017"
+  "today": "11 Jul 2017"
 }
 ```
 

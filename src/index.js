@@ -2,9 +2,8 @@ const CDP = require('chrome-remote-interface');
 const chromeLauncher = require('chrome-launcher');
 const cheerio = require('cheerio');
 
-const getShowtimes = movieTheatreId => {
+const getShowtimes = (movieTheatreId, dayOffset = 0) => {
   return new Promise(async (resolve, reject) => {
-
     // First scrape the showtime data using Google Chrome from the SF Cinemacity website
     const launchChrome = () =>
       chromeLauncher.launch({ chromeFlags: ['--disable-gpu', '--headless'] });
@@ -28,9 +27,14 @@ const getShowtimes = movieTheatreId => {
         await timeout(3000); // give the JS some time to load
 
         // first set the language to English
-        const result = await Runtime.evaluate({
+        await Runtime.evaluate({
           expression:
             "document.querySelector('.lang-switcher li:nth-of-type(2) a').click()"
+        });
+
+        // click the date we want to get showtimes for
+        await Runtime.evaluate({
+          expression: `document.querySelector('[data-slick-index="${dayOffset}"]').click()`
         });
 
         // get the page source
@@ -49,7 +53,6 @@ const getShowtimes = movieTheatreId => {
           movies: {}
         };
         $('.showtime-box').each((i, movieNode) => {
-
           // Set the title of this cinema, today's date, and the object of movies.
           movieTheatreData.movieTheatreName = $('.showtime-cinema-name').text();
           movieTheatreData.today = $('.slick-slide.selected .date').text();
@@ -87,11 +90,6 @@ const getShowtimes = movieTheatreId => {
               .first()
               .text()
               .split('Rate: ')[1],
-            duration: `${$(movieNode)
-              .find('.movie-detail .movie-detail-list .list-item')
-              .last()
-              .text()
-              .split(' ')[1]} mins`,
             cinemas
           };
         });
