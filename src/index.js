@@ -55,7 +55,7 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
         $('.showtime-box').each((i, movieNode) => {
           // Set the title of this cinema, today's date, and the object of movies.
           movieTheatreData.movieTheatreName = $('.showtime-cinema-name').text();
-          movieTheatreData.today = $('.slick-slide.selected .date').text();
+          movieTheatreData.date = $('.slick-slide.selected .date').text();
 
           /*
             Build up the leaf nodes of the tree, namely for a cinema for a movie,
