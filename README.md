@@ -44,7 +44,7 @@ Returns:
 
 ```
 {
-  "movies": {
+  "movieTimes": {
     "Spider-Man: Homecoming": {
       "rating": "G",
       "cinemas": {
@@ -111,7 +111,7 @@ Returns:
     }
   },
   "movieTheatreName": "SFX CINEMA Maya Chiangmai",
-  "today": "11 Jul 2017"
+  "date": "11 Jul 2017"
 }
 ```
 

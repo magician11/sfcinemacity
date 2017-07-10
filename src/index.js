@@ -50,7 +50,7 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
 
         // now proess that HTML
         const movieTheatreData = {
-          movies: {}
+          movieTimes: {}
         };
         $('.showtime-box').each((i, movieNode) => {
           // Set the title of this cinema, today's date, and the object of movies.
@@ -82,7 +82,7 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
             Then create the full movie object with the movie name as the key, and with the properties
             of the rating, the duration, and the cinemas showing the movie at this theatre.
           */
-          movieTheatreData.movies[
+          movieTheatreData.movieTimes[
             $(movieNode).find('.movie-detail .name').text()
           ] = {
             rating: $(movieNode)
