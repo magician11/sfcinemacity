@@ -61,9 +61,10 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
             Build up the leaf nodes of the tree, namely for a cinema for a movie,
             what language is it showing in and what are the showtimes.
           */
-          const cinemas = {};
+          const cinemas = [];
           $(movieNode).find('.showtime-item').each((i, cinemaNode) => {
-            cinemas[$(cinemaNode).find('.theater-no').text()] = {
+            cinemas.push({
+              cinemaNumber: $(cinemaNode).find('.theater-no').text(),
               language: $(cinemaNode)
                 .find('.right-section .list-item')
                 .first()
@@ -75,7 +76,7 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
                 .map((i, el) => $(el).text())
                 .get()
                 .join()
-            };
+            });
           });
 
           /*
