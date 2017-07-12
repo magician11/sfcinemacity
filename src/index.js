@@ -48,6 +48,12 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
         // load the page source into cheerio
         const $ = cheerio.load(pageSource.outerHTML);
 
+        // if there are no movies listed for this, day simply resolve with null
+        if ($('.showtime-box').length === 0) {
+          resolve(null);
+          return;
+        }
+
         // now proess that HTML
         const movieTheatreData = {
           movieTimes: {}

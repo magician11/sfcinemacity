@@ -40,6 +40,7 @@ Parameters:
 - an optional dayOffset (0 is the default which also means today. 1 would be tomorrow)
 
 Returns:
+- either `null` if no showtimes were found, or
 - a promise that resolves with an object with a data structure that looks like this:
 
 ```
