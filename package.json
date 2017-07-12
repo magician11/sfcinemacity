@@ -1,9 +1,14 @@
 {
   "name": "sfcinemacity",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Module to get showtimes from the SF Cinema booking system.",
   "main": "src/index.js",
-  "keywords": ["movies", "thailand", "sfcinemacity", "showtimes"],
+  "keywords": [
+    "movies",
+    "thailand",
+    "sfcinemacity",
+    "showtimes"
+  ],
   "author": "Andrew Golightly <support@andrewgolightly.com> (http://www.golightlyplus.com)",
   "license": "ISC",
   "repository": {
@@ -17,5 +22,10 @@
     "cheerio": "^1.0.0-rc.2",
     "chrome-launcher": "^0.3.1",
     "chrome-remote-interface": "^0.24.0"
+  },
+  "devDependencies": {
+    "eslint": "^4.2.0",
+    "eslint-config-airbnb-base": "^11.2.0",
+    "eslint-plugin-import": "^2.7.0"
   }
 }

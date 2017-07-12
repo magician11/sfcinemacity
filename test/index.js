@@ -10,11 +10,7 @@ const getMayaMallShowtimes = async () => {
     const mayaMallId = 9936;
     // fetch all the showtimes for tomorrow
     const movieShowtimes = await getShowtimes(mayaMallId, 1);
-    if (movieShowtimes === null) {
-      console.log('No showtimes were found for this day.');
-    } else {
-      console.log(JSON.stringify(movieShowtimes, null, 2));
-    }
+    console.log(JSON.stringify(movieShowtimes, null, 2));
   } catch (error) {
     console.log(`Whoops, something went wrong: ${error}`);
   }

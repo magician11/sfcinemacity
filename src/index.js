@@ -11,7 +11,8 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
     const chrome = await launchChrome();
     const protocol = await CDP({ port: chrome.port });
 
-    const timeout = ms => new Promise(resolve => setTimeout(resolve, ms));
+    const timeout = ms =>
+      new Promise(resolveTimeout => setTimeout(resolveTimeout, ms));
 
     // See API docs: https://chromedevtools.github.io/devtools-protocol/
     const { Page, Runtime, DOM } = protocol;
@@ -48,62 +49,57 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
         // load the page source into cheerio
         const $ = cheerio.load(pageSource.outerHTML);
 
-        // if there are no movies listed for this, day simply resolve with null
-        if ($('.showtime-box').length === 0) {
-          resolve(null);
-          return;
-        }
-
         // now proess that HTML
         const movieTheatreData = {
+          date: $('.slick-slide.selected .date').text(),
+          movieTheatreName: $('.showtime-cinema-name').text(),
           movieTimes: {}
         };
-        $('.showtime-box').each((i, movieNode) => {
-          // Set the title of this cinema, today's date, and the object of movies.
-          movieTheatreData.movieTheatreName = $('.showtime-cinema-name').text();
-          movieTheatreData.date = $('.slick-slide.selected .date').text();
 
+        $('.showtime-box').each((movieIndex, movieNode) => {
           /*
             Build up the leaf nodes of the tree, namely for a cinema for a movie,
             what language is it showing in and what are the showtimes.
           */
           const cinemas = [];
-          $(movieNode).find('.showtime-item').each((i, cinemaNode) => {
-            cinemas.push({
-              cinemaNumber: $(cinemaNode).find('.theater-no').text(),
-              language: $(cinemaNode)
-                .find('.right-section .list-item')
-                .first()
-                .text()
-                .split(' ')[1]
-                .slice(0, -1),
-              times: $(cinemaNode)
-                .find('.time-list .time-item')
-                .map((i, el) => $(el).text())
-                .get()
-                .join()
-            });
-          });
+          $(movieNode)
+            .find('.showtime-item')
+            .each((cinemaIndex, cinemaNode) => {
+              cinemas.push({
+                cinemaNumber: $(cinemaNode).find('.theater-no').text(),
+                language: $(cinemaNode)
+                  .find('.right-section .list-item')
+                  .first()
+                  .text()
+                  .split(' ')[1]
+                  .slice(0, -1),
+                times: $(cinemaNode)
+                  .find('.time-list .time-item')
+                  .map((index, el) => $(el).text())
+                  .get()
+                  .join()
+              });
 
-          /*
+              /*
             Then create the full movie object with the movie name as the key, and with the properties
             of the rating, the duration, and the cinemas showing the movie at this theatre.
           */
-          movieTheatreData.movieTimes[
-            $(movieNode).find('.movie-detail .name').text()
-          ] = {
-            rating: $(movieNode)
-              .find('.movie-detail .movie-detail-list .list-item')
-              .first()
-              .text()
-              .split('Rate: ')[1],
-            cinemas
-          };
+              movieTheatreData.movieTimes[
+                $(movieNode).find('.movie-detail .name').text()
+              ] = {
+                rating: $(movieNode)
+                  .find('.movie-detail .movie-detail-list .list-item')
+                  .first()
+                  .text()
+                  .split('Rate: ')[1],
+                cinemas
+              };
+            });
         });
 
         resolve(movieTheatreData);
       } catch (err) {
-        console.log(err);
+        reject(err);
       }
     });
   });
