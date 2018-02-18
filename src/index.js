@@ -6,7 +6,9 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
   return new Promise(async (resolve, reject) => {
     // First scrape the showtime data using Google Chrome from the SF Cinemacity website
     const launchChrome = () =>
-      chromeLauncher.launch({ chromeFlags: ['--disable-gpu', '--headless'] });
+      chromeLauncher.launch({
+        chromeFlags: ['--disable-gpu', '--headless', '--no-sandbox']
+      });
 
     const chrome = await launchChrome();
     const protocol = await CDP({ port: chrome.port });
@@ -35,7 +37,9 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
 
         // click the date we want to get showtimes for
         await Runtime.evaluate({
-          expression: `document.querySelector('[data-slick-index="${dayOffset}"]').click()`
+          expression: `document.querySelector('[data-slick-index="${
+            dayOffset
+          }"]').click()`
         });
 
         // get the page source
@@ -66,7 +70,9 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
             .find('.showtime-item')
             .each((cinemaIndex, cinemaNode) => {
               cinemas.push({
-                cinemaNumber: $(cinemaNode).find('.theater-no').text(),
+                cinemaNumber: $(cinemaNode)
+                  .find('.theater-no')
+                  .text(),
                 language: $(cinemaNode)
                   .find('.right-section .list-item')
                   .first()
@@ -85,7 +91,9 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
             of the rating, the duration, and the cinemas showing the movie at this theatre.
           */
               movieTheatreData.movieTimes[
-                $(movieNode).find('.movie-detail .name').text()
+                $(movieNode)
+                  .find('.movie-detail .name')
+                  .text()
               ] = {
                 rating: $(movieNode)
                   .find('.movie-detail .movie-detail-list .list-item')
@@ -99,7 +107,7 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
 
         resolve(movieTheatreData);
       } catch (err) {
-        reject(err);
+        reject(`SF Cinema City error: ${err}`);
       }
     });
   });
