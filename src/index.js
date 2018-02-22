@@ -29,7 +29,7 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
       try {
         await timeout(3000); // give the JS some time to load
 
-        // first set the language to English
+        // first set the language option to English, to convert the content to English
         await Runtime.evaluate({
           expression:
             "document.querySelector('.lang-switcher li:nth-of-type(2) a').click()"
@@ -53,26 +53,22 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
         // load the page source into cheerio
         const $ = cheerio.load(pageSource.outerHTML);
 
-        // now proess that HTML
+        // now process that HTML
         const movieTheatreData = {
           date: $('.slick-slide.selected .date').text(),
           movieTheatreName: $('.showtime-cinema-name').text(),
-          movieTimes: {}
+          movieTheatreId,
+          movies: []
         };
 
+        // for each movie showing on this day at this movie theatre..
         $('.showtime-box').each((movieIndex, movieNode) => {
-          /*
-            Build up the leaf nodes of the tree, namely for a cinema for a movie,
-            what language is it showing in and what are the showtimes.
-          */
+          // collate all the cinemas it's showing at (the showtimes and language per cinema)
           const cinemas = [];
           $(movieNode)
             .find('.showtime-item')
             .each((cinemaIndex, cinemaNode) => {
               cinemas.push({
-                cinemaNumber: $(cinemaNode)
-                  .find('.theater-no')
-                  .text(),
                 language: $(cinemaNode)
                   .find('.right-section .list-item')
                   .first()
@@ -85,29 +81,25 @@ const getShowtimes = (movieTheatreId, dayOffset = 0) => {
                   .get()
                   .join()
               });
-
-              /*
-            Then create the full movie object with the movie name as the key, and with the properties
-            of the rating, the duration, and the cinemas showing the movie at this theatre.
-          */
-              movieTheatreData.movieTimes[
-                $(movieNode)
-                  .find('.movie-detail .name')
-                  .text()
-              ] = {
-                rating: $(movieNode)
-                  .find('.movie-detail .movie-detail-list .list-item')
-                  .first()
-                  .text()
-                  .split('Rate: ')[1],
-                cinemas
-              };
             });
+
+          // then finally capture the title, the rating, and the cinema showtimes collated above
+          movieTheatreData.movies.push({
+            movieTitle: $(movieNode)
+              .find('.movie-detail .name')
+              .text(),
+            rating: $(movieNode)
+              .find('.movie-detail .movie-detail-list .list-item')
+              .first()
+              .text()
+              .split('Rate: ')[1],
+            cinemas
+          });
         });
 
         resolve(movieTheatreData);
       } catch (err) {
-        reject(`SF Cinema City error: ${err}`);
+        reject(`Error scraping movie data from SF Cinema City: ${err}`);
       }
     });
   });

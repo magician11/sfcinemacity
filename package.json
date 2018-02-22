@@ -1,6 +1,6 @@
 {
   "name": "sfcinemacity",
-  "version": "2.0.9",
+  "version": "3.0.8",
   "description": "Module to get showtimes from the SF Cinema booking system.",
   "main": "src/index.js",
   "keywords": ["movies", "thailand", "sfcinemacity", "showtimes"],
