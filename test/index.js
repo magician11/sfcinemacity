@@ -9,7 +9,7 @@ const getMayaMallShowtimes = async () => {
   try {
     const mayaMallId = 9936;
     // fetch all the showtimes for tomorrow
-    const movieShowtimes = await getShowtimes(mayaMallId, 1);
+    const movieShowtimes = await getShowtimes(mayaMallId, 3);
     console.log(JSON.stringify(movieShowtimes, null, 2));
   } catch (error) {
     console.log(`Whoops, something went wrong: ${error}`);

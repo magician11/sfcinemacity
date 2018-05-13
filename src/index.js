@@ -34,10 +34,11 @@ const getShowtimes = async (movieTheatreId, dayOffset = 0) => {
         "document.querySelector('.lang-switcher li:nth-of-type(2) a').click()"
     });
 
-    // click the date we want to get showtimes for
+    // click the date we want to get showtimes for, and wait a moment for that JS to execute
     await Runtime.evaluate({
-      expression: `document.querySelector('[data-slick-index="${dayOffset}"]').click()`
+      expression: `document.querySelector('[data-slick-index="${dayOffset}"] .day').click()`
     });
+    await timeout(1000);
 
     // get the page source
     const rootNode = await DOM.getDocument({ depth: -1 });
