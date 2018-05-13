@@ -16,5 +16,5 @@ const getMayaMallShowtimes = async () => {
   }
 };
 
-console.log('Fetching showtimes for Maya Mall (Chiang Mai, Thailand).');
+console.log('Fetching showtimes for Maya Mall (Chiang Mai, Thailand)');
 getMayaMallShowtimes();

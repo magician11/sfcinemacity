@@ -36,9 +36,7 @@ const getShowtimes = async (movieTheatreId, dayOffset = 0) => {
 
     // click the date we want to get showtimes for
     await Runtime.evaluate({
-      expression: `document.querySelector('[data-slick-index="${
-        dayOffset
-      }"]').click()`
+      expression: `document.querySelector('[data-slick-index="${dayOffset}"]').click()`
     });
 
     // get the page source
@@ -54,7 +52,7 @@ const getShowtimes = async (movieTheatreId, dayOffset = 0) => {
 
     // now process that HTML
     const movieTheatreData = {
-      date: $('.slick-slide.selected .date').text(),
+      date: $('.slick-slide .selected .date').text(),
       movieTheatreName: $('.showtime-cinema-name').text(),
       movieTheatreId,
       movies: []
