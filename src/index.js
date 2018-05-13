@@ -97,7 +97,7 @@ const getShowtimes = async (movieTheatreId, dayOffset = 0) => {
 
     return movieTheatreData;
   } catch (err) {
-    reject(`Error scraping movie data from SF Cinema City: ${err}`);
+    throw `Error scraping movie data from SF Cinema City: ${err}`;
   }
 };
 
