@@ -5,10 +5,7 @@ A module to get showtimes for movies from the
 
 ## Usage
 
-First install [Chrome Canary](https://www.google.com/chrome/browser/canary.html)
-on your machine.
-
-Then install this module: `yarn add sfcinemacity`
+Then install this module: `npm install sfcinemacity`
 
 Then you can use it in your code, something like
 
@@ -19,7 +16,7 @@ const getMayaMallShowtimes = async () => {
   try {
     const mayaMallId = 9936;
     // fetch all the showtimes for Maya Mall for tomorrow
-    const movieShowtimes = await getShowtimes(mayaMallId, 1);
+    const movieShowtimes = await getShowtimes(mayaMallId, 3);
     console.log(JSON.stringify(movieShowtimes, null, 2));
   } catch (error) {
     console.log(`Whoops, something went wrong: ${error}`);
@@ -34,70 +31,59 @@ getMayaMallShowtimes();
 
 Cinema IDs are:
 
-* Maya Mall in Chiang Mai -> 9936
+- Maya Mall in Chiang Mai -> 9936
 
 ### getShowtimes
 
 Parameters:
 
-* a movieTheatreId (see the IDs above)
-* an optional dayOffset (0 is the default which also means today. 1 would be
+- a movieTheatreId (see the IDs above)
+- an optional dayOffset (0 is the default which also means today. 1 would be
   tomorrow)
 
 Returns:
 
-* a promise that resolves with an object with a data structure that looks like
+- a promise that resolves with an object with a data structure that looks like
   this:
 
 ```
+Fetching showtimes for Maya Mall (Chiang Mai, Thailand)
 {
-  "date": "23 Feb 2018",
+  "date": "27 Oct 2019",
   "movieTheatreName": "SFX CINEMA MAYA Chiangmai",
-  "movieTheatreId": 9936,
   "movies": [
     {
-      "movieTitle": "Call Me by Your Name",
+      "movieTitle": "Terminator Dark Fate",
       "rating": "15",
       "cinemas": [
         {
           "language": "ENG",
-          "times": "19:00"
+          "times": "12:40,15:20,18:00,20:40,23:20"
         }
       ]
     },
     {
-      "movieTitle": "Black Panther",
+      "movieTitle": "Bikeman 2",
       "rating": "13",
       "cinemas": [
         {
-          "language": "ENG",
-          "times": "12:00,15:00,18:00,21:00"
-        },
-        {
-          "language": "ENG",
-          "times": "11:20,14:20,17:20,20:20,23:20"
-        },
-        {
-          "language": "ENG",
-          "times": "12:50,15:50,18:50,21:50"
-        },
-        {
           "language": "TH",
-          "times": "13:30,16:30,19:30,22:30"
+          "times": "11:30,14:00,16:30,19:00,21:30"
         }
       ]
     },
     {
-      "movieTitle": "The Long Excuse",
-      "rating": "18",
+      "movieTitle": "Maleficent : Mistress Of Evil",
+      "rating": "G",
       "cinemas": [
         {
-          "language": "JP",
-          "times": "19:00"
+          "language": "ENG",
+          "times": "13:00,15:40,18:20,21:00,23:35"
         }
       ]
     }
-  ]
+  ],
+  "movieTheatreId": 9936
 }
 ```
 

@@ -1,7 +1,7 @@
 const puppeteer = require('puppeteer');
 
 const getShowtimes = async (movieTheatreId, dayOffset = 0) => {
-  const browser = await puppeteer.launch({ headless: false, slowMo: 110 });
+  const browser = await puppeteer.launch({ slowMo: 110 });
   const page = await browser.newPage();
   try {
     /* Go to the IMDB Movie page and wait for it to load */
@@ -11,8 +11,10 @@ const getShowtimes = async (movieTheatreId, dayOffset = 0) => {
     );
     // choose English
     await page.click('.lang-switcher li:nth-of-type(2) a');
+    const dataSelector = `[data-slick-index="${dayOffset}"]`;
+    await page.waitFor(dataSelector);
     // choose the day we want to extract
-    await page.click(`[data-slick-index="${dayOffset}"]`, { timeout: 110000 });
+    await page.click(dataSelector);
 
     const movieTheatreData = await page.evaluate(() => {
       const movies = [];
