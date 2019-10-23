@@ -1,102 +1,64 @@
-const CDP = require('chrome-remote-interface');
-const chromeLauncher = require('chrome-launcher');
-const cheerio = require('cheerio');
-
-const timeout = ms =>
-  new Promise(resolveTimeout => setTimeout(resolveTimeout, ms));
+const puppeteer = require('puppeteer');
 
 const getShowtimes = async (movieTheatreId, dayOffset = 0) => {
+  const browser = await puppeteer.launch({ headless: false, slowMo: 110 });
+  const page = await browser.newPage();
   try {
-    // First scrape the showtime data using Google Chrome from the SF Cinemacity website
-    const launchChrome = () =>
-      chromeLauncher.launch({
-        chromeFlags: ['--disable-gpu', '--headless', '--no-sandbox']
-      });
+    /* Go to the IMDB Movie page and wait for it to load */
+    await page.goto(
+      `https://www.sfcinemacity.com/showtime/cinema/${movieTheatreId}`,
+      { waitUntil: 'networkidle0' } // wait until all content is loaded, especially the JS
+    );
+    // choose English
+    await page.click('.lang-switcher li:nth-of-type(2) a');
+    // choose the day we want to extract
+    await page.click(`[data-slick-index="${dayOffset}"]`, { timeout: 110000 });
 
-    const chrome = await launchChrome();
-    const protocol = await CDP({ port: chrome.port });
-
-    // See API docs: https://chromedevtools.github.io/devtools-protocol/
-    const { Page, Runtime, DOM } = protocol;
-    await Promise.all([Page.enable(), Runtime.enable(), DOM.enable()]);
-
-    await Page.navigate({
-      url: `https://www.sfcinemacity.com/showtime/cinema/${movieTheatreId}`
-    });
-
-    // wait until the page says it's loaded...
-    await Page.loadEventFired();
-    await timeout(3000); // give the JS some time to load
-
-    // first set the language option to English, to convert the content to English
-    await Runtime.evaluate({
-      expression:
-        "document.querySelector('.lang-switcher li:nth-of-type(2) a').click()"
-    });
-
-    // click the date we want to get showtimes for, and wait a moment for that JS to execute
-    await Runtime.evaluate({
-      expression: `document.querySelector('[data-slick-index="${dayOffset}"] .day').click()`
-    });
-    await timeout(1000);
-
-    // get the page source
-    const rootNode = await DOM.getDocument({ depth: -1 });
-    const pageSource = await DOM.getOuterHTML({
-      nodeId: rootNode.root.nodeId
-    });
-    protocol.close();
-    chrome.kill();
-
-    // load the page source into cheerio
-    const $ = cheerio.load(pageSource.outerHTML);
-
-    // now process that HTML
-    const movieTheatreData = {
-      date: $('.slick-slide .selected .date').text(),
-      movieTheatreName: $('.showtime-cinema-name').text(),
-      movieTheatreId,
-      movies: []
-    };
-
-    // for each movie showing on this day at this movie theatre..
-    $('.showtime-box').each((movieIndex, movieNode) => {
-      // collate all the cinemas it's showing at (the showtimes and language per cinema)
-      const cinemas = [];
-      $(movieNode)
-        .find('.showtime-item')
-        .each((cinemaIndex, cinemaNode) => {
-          cinemas.push({
-            language: $(cinemaNode)
-              .find('.right-section .list-item')
-              .first()
-              .text()
-              .split(' ')[1]
-              .slice(0, -1),
-            times: $(cinemaNode)
-              .find('.time-list .time-item')
-              .map((index, el) => $(el).text())
-              .get()
-              .join()
+    const movieTheatreData = await page.evaluate(() => {
+      const movies = [];
+      console.log(document.querySelectorAll('.showtime-box').length);
+      document.querySelectorAll('.showtime-box').forEach(movieElement => {
+        console.log('a movie..');
+        console.log(movieElement.querySelector('.name').innerText);
+        const cinemas = [];
+        movieElement
+          .querySelectorAll('.showtime-item')
+          .forEach(showtimeElement => {
+            cinemas.push({
+              language: showtimeElement
+                .querySelector('.right-section .list-item')
+                .innerText.trim(),
+              times: showtimeElement
+                .querySelector('.time-list')
+                .innerText.replace(/\n/g, ',')
+            });
           });
+        movies.push({
+          movieTitle: movieElement.querySelector('.movie-detail .name')
+            .innerText,
+          rating: movieElement
+            .querySelector('.movie-detail .movie-detail-list .list-item')
+            .innerText.substring(6),
+          cinemas
         });
-
-      // then finally capture the title, the rating, and the cinema showtimes collated above
-      movieTheatreData.movies.push({
-        movieTitle: $(movieNode)
-          .find('.movie-detail .name')
-          .text(),
-        rating: $(movieNode)
-          .find('.movie-detail .movie-detail-list .list-item')
-          .first()
-          .text()
-          .split('Rate: ')[1],
-        cinemas
       });
+
+      return {
+        date: document.querySelector('.slick-slide .selected .date').innerText,
+        movieTheatreName: document.querySelector('.showtime-cinema-name')
+          .innerText,
+        movies
+      };
     });
+
+    movieTheatreData.movieTheatreId = movieTheatreId;
+
+    await browser.close();
 
     return movieTheatreData;
   } catch (err) {
+    await browser.close();
+    console.log('Browser Closed');
     throw `Error scraping movie data from SF Cinema City: ${err}`;
   }
 };

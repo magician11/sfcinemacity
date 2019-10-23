@@ -1,11 +1,15 @@
 {
   "name": "sfcinemacity",
-  "version": "3.0.33",
+  "version": "4.0.7",
   "description": "Module to get showtimes from the SF Cinema booking system.",
   "main": "src/index.js",
-  "keywords": ["movies", "thailand", "sfcinemacity", "showtimes"],
-  "author":
-    "Andrew Golightly <support@andrewgolightly.com> (http://www.golightlyplus.com)",
+  "keywords": [
+    "movies",
+    "thailand",
+    "sfcinemacity",
+    "showtimes"
+  ],
+  "author": "Andrew Golightly <support@andrewgolightly.com> (http://www.golightlyplus.com)",
   "license": "ISC",
   "repository": {
     "type": "git",
@@ -15,8 +19,6 @@
     "url": "https://github.com/magician11/sfcinemacity/issues"
   },
   "dependencies": {
-    "cheerio": "^1.0.0-rc.2",
-    "chrome-launcher": "^0.10.2",
-    "chrome-remote-interface": "^0.25.5"
+    "puppeteer": "^1.20.0"
   }
 }
