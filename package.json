@@ -1,6 +1,6 @@
 {
   "name": "sfcinemacity",
-  "version": "4.2.5",
+  "version": "4.3.4",
   "description": "Module to get showtimes from the SF Cinema booking system.",
   "main": "src/index.js",
   "keywords": [

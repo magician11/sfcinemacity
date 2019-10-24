@@ -18,10 +18,7 @@ const getShowtimes = async (movieTheatreId, dayOffset = 0) => {
 
     const movieTheatreData = await page.evaluate(() => {
       const movies = [];
-      console.log(document.querySelectorAll('.showtime-box').length);
       document.querySelectorAll('.showtime-box').forEach(movieElement => {
-        console.log('a movie..');
-        console.log(movieElement.querySelector('.name').innerText);
         const cinemas = [];
         movieElement
           .querySelectorAll('.showtime-item')
@@ -60,7 +57,6 @@ const getShowtimes = async (movieTheatreId, dayOffset = 0) => {
     return movieTheatreData;
   } catch (err) {
     await browser.close();
-    console.log('Browser Closed');
     throw `Error scraping movie data from SF Cinema City: ${err}`;
   }
 };
