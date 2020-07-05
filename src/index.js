@@ -1,7 +1,11 @@
 const puppeteer = require('puppeteer');
 
 const getShowtimes = async (movieTheatreId, dayOffset = 0) => {
-  const browser = await puppeteer.launch({ slowMo: 110 });
+  const browser = await puppeteer.launch({
+    slowMo: 110,
+    headless: true,
+    args: ['--no-sandbox']
+  });
   const page = await browser.newPage();
   try {
     /* Go to the IMDB Movie page and wait for it to load */
